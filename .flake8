@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 88
+exclude = .git,
+    __pycache__,
+    venv/,          # ← match “venv/…” on any platform
+    .venv/,         # ← for “.venv/…”
+    env/,
+    build/,
+    dist/
+ignore = E203, W503
