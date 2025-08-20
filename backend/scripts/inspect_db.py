@@ -3,7 +3,7 @@ and retrieves information about the items stored in that collection."""
 import chromadb
 import pprint  # for nicely formatted dictionary printing
 
-from smart_librarian.config import CHROMA_DB_PATH, COLLECTION_NAME
+from backend.smart_librarian.config import CHROMA_DB_PATH, COLLECTION_NAME
 
 
 def main():
