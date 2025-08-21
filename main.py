@@ -1,6 +1,14 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
-from backend.smart_librarian.api import chat
-from backend.smart_librarian.api import audio
+
+# Load environment variables (OPENAI_API_KEY) from .env file
+load_dotenv()
+if os.getenv("OPENAI_API_KEY") is None:
+    raise EnvironmentError("OPENAI_API_KEY not found in the .env file")
+
+from smart_librarian.api import audio, chat
 
 app = FastAPI(title="Smart Librarian API")
 

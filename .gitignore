@@ -6,10 +6,19 @@ __pycache__/
 *.pyc
 
 # Environments
-backend/.env
+.env
 .venv
 env/
 venv/
 
 # PyCharm
 .idea/
+
+# Application data
+# Ignore generated database files from ChromaDB
+/data/chroma_db/
+
+# Ignore generated audio files from the TTS service
+/data/speech.mp3
+
+prompt_examples/

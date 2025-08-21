@@ -9,7 +9,7 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from openai import OpenAI
 import chromadb
-from backend.smart_librarian.config import CHROMA_DB_PATH, COLLECTION_NAME, EMBEDDING_MODEL, JSON_PATH
+from smart_librarian.config import CHROMA_DB_PATH, COLLECTION_NAME, EMBEDDING_MODEL, JSON_PATH
 
 # ---------- Load env vars early ---------- #
 load_dotenv()  # os.getenv("OPENAI_API_KEY") can see .env
@@ -55,17 +55,22 @@ def main():
     # print(f"JSON path: {JSON_PATH}")
 
     # 1) Load book objects
+    print(f"Loading books from {JSON_PATH}...")
     books = load_books(JSON_PATH)
     if not books:
         raise ValueError("book_summaries.json is empty – nothing to embed.")
+    print(f"Found {len(books)} books to process.")
 
     # 2) Build embedding strings: include the title to enrich semantic signal
     texts = [f"{b['title']}. {b['summary']}" for b in books]
 
     # 3) Generate embeddings in batch
+    print(f"Generating embeddings for {len(texts)} texts using '{EMBEDDING_MODEL}'...")
     embeddings = embed_texts(texts)
+    print("Embeddings generated successfully.")
 
     # 4) Initialise (or connect to) local ChromaDB store
+    print(f"Connecting to ChromaDB at: {CHROMA_DB_PATH}")
     client = chromadb.PersistentClient(path=str(CHROMA_DB_PATH))
 
     # 5) Create / open the collection

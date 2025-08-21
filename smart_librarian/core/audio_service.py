@@ -1,5 +1,5 @@
 from openai import OpenAI
-from backend.smart_librarian.config import TTS_MODEL
+from smart_librarian.config import TTS_MODEL
 
 # Initialize the OpenAI client
 openai_client = OpenAI()
@@ -11,12 +11,13 @@ def generate_speech_stream(text: str):
     Returns the streaming response object.
     """
     try:
-        response_stream = openai_client.audio.speech.with_streaming_response.create(
-            model=TTS_MODEL,
-            voice="alloy",
-            input=text
-        )
-        return response_stream
+        with openai_client.audio.speech.with_streaming_response.create(
+                model=TTS_MODEL,
+                voice="alloy",
+                input=text
+        ) as response_stream:
+            # `yield from` passes the chunks from the stream directly to the caller
+            yield from response_stream.iter_bytes()
 
     except Exception as e:
         print(f"Error generating speech stream: {e}")

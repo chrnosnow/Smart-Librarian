@@ -1,11 +1,9 @@
 import json
-import re
 from functools import lru_cache
 from pathlib import Path
 
 import chromadb
 from openai import OpenAI
-from unidecode import unidecode
 
 from smart_librarian.config import (
     CHAT_MODEL,
@@ -92,15 +90,20 @@ class RAGService:
         # 2. RAG - Augmentation: Construct the context for the prompt
         context = "\n\n---\n\n".join(retrieved_docs)  # concatenate the most relevant books to create the context for AI
         prompt = f"""
-You are a friendly and helpful assistant specializing in book recommendations.
-Your task is to recommend ONE book based on the user's interest, using ONLY the summaries provided below.
+You are a specialized book recommendation assistant. Your task is to follow these rules strictly:
 
-**First, provide a brief, 1-2 sentence explanation for your choice.**
+1.  Your ONLY source of information is the "Available Summaries" provided below. Do NOT use any of your own knowledge about books.
+2.  You must analyze the user's interest and compare it against the provided summaries.
+3.  **Decision Rule:**
+    - **IF** you find a book summary that is a strong, direct match for the user's interest, you will recommend that ONE book.
+    - **ELSE** (if there are no strong matches or the summaries are irrelevant to the user's interest), you MUST respond with: "I couldn't find a suitable book in my database for that specific interest. Could I help you with a different theme?" Do not try to recommend the 'closest' or 'most similar' book if it is not a good fit.
 
-After your explanation, you MUST call the `get_summary_by_title` tool to retrieve the detailed summary for the recommended book.
+4.  **Format for a Successful Recommendation:**
+    - First, provide a brief, 1-2 sentence explanation for why the book is a good match.
+    - After your explanation, you MUST call the `get_summary_by_title` tool. Do not write the summary yourself.
 
-Available summaries (context):
 ---
+Available summaries (context):
 {context}
 ---
 

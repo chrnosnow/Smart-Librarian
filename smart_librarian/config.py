@@ -1,20 +1,21 @@
-# config.py
 from pathlib import Path
-from unidecode import unidecode
 
 # ---------- Paths & Constants ---------- #
 
 # Base directory of the project
-BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# Path to data directory
+DATA_DIR = PROJECT_ROOT / "data"
 
 # Path to the JSON file containing book summaries
-JSON_PATH = BASE_DIR / "data" / "book_summaries.json"
+JSON_PATH = DATA_DIR / "book_summaries.json"
 
 # Path to the ChromaDB directory
-CHROMA_DB_PATH = BASE_DIR / "chroma_storage"
+CHROMA_DB_PATH = DATA_DIR / "chroma_storage"
 
 # Path to the audio file for speech output
-SPEECH_OUTPUT_PATH = BASE_DIR / "speech.mp3"
+SPEECH_OUTPUT_PATH = DATA_DIR / "speech.mp3"
 
 # --- ChromaDB ---
 # Name of the collection in ChromaDB

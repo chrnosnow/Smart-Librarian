@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 # Import the core RAG logic from your service layer
 # This is a key principle of clean architecture: the API layer depends on the service layer.
-from smart_librarian.core.rag_service import ask_book_chat, openai_client
+from smart_librarian.core.rag_service import rag_service
 from smart_librarian.core.helpers import is_safe
 
 router = APIRouter()
@@ -46,7 +46,7 @@ async def handle_chat_request(request: ChatRequest):
     if not user_query or user_query.isspace():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
-    if not is_safe(text=user_query, client=openai_client):
+    if not is_safe(text=user_query, client=rag_service.openai_client):
         return ChatResponse(answer="I can only discuss topics related to books. Please use appropriate language.")
 
     try:
@@ -58,7 +58,7 @@ async def handle_chat_request(request: ChatRequest):
         ]
 
         # Call the RAG service to get the book recommendation
-        response_text = ask_book_chat(user_query, conversation_history)
+        response_text = rag_service.ask_book_chat(user_query, conversation_history)
 
         # 3. Return the structured response
         return ChatResponse(answer=response_text)
