@@ -23,8 +23,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     """Defines the structure of the JSON response sent back to the frontend."""
     answer: str
-    # add more fields here later for other features, e.g., imageUrl
-    # imageUrl: str | None = None
+    imageUrl: str | None = None
 
 
 # --- API Endpoint ---
@@ -42,7 +41,7 @@ async def handle_chat_request(request: ChatRequest):
     """
     user_query = request.query
 
-    # 1. Input validation and safety check
+    # Input validation and safety check
     if not user_query or user_query.isspace():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
@@ -50,7 +49,7 @@ async def handle_chat_request(request: ChatRequest):
         return ChatResponse(answer="I can only discuss topics related to books. Please use appropriate language.")
 
     try:
-        # 2. Call the core RAG service to get the answer
+        # Call the core RAG service to get the answer
         # We create a new, empty conversation history for each request for a stateless API.
         # For a stateful chat, you would manage this history differently.
         conversation_history = [
@@ -58,10 +57,10 @@ async def handle_chat_request(request: ChatRequest):
         ]
 
         # Call the RAG service to get the book recommendation
-        response_text = await rag_service.ask_book_chat(user_query, conversation_history)
+        response_text, image_url = await rag_service.ask_book_chat(user_query, conversation_history)
 
-        # 3. Return the structured response
-        return ChatResponse(answer=response_text)
+        # Return the structured response
+        return ChatResponse(answer=response_text, imageUrl=image_url)
 
     except Exception as e:
         # If anything goes wrong in the RAG service, we catch it here

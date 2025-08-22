@@ -33,3 +33,6 @@ TTS_MODEL = "tts-1"
 
 # Speech-to-Text model for transcription
 STT_MODEL = "whisper-1"
+
+# Image generation model
+IMAGE_MODEL = "dall-e-3"

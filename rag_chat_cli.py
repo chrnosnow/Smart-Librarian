@@ -57,7 +57,7 @@ def play_audio_response(text: str):
 def record_and_transcribe_audio() -> str:
     """Records audio from the microphone, saves it, and transcribes it."""
     try:
-        # 1. Record Audio
+        # Record Audio
         duration_str = input("Enter recording duration in seconds (e.g., 5): ")
         duration = int(duration_str)
         print("\nRecording...")
@@ -65,7 +65,7 @@ def record_and_transcribe_audio() -> str:
         sd.wait()  # Wait until recording is finished
         print("Recording finished.")
 
-        # 2. Normalize audio ---
+        # Normalize audio ---
         # Convert to floating point numbers for calculations
         recording_float = recording.astype(np.float32)
 
@@ -84,11 +84,11 @@ def record_and_transcribe_audio() -> str:
             # If it's pure silence, do nothing
             normalized_recording = recording
 
-        # 3. Save the normalized recording to a WAV file
+        # Save the normalized recording to a WAV file
         print(f"Saving recording to {RECORDING_PATH}...")
         write(RECORDING_PATH, SAMPLE_RATE, normalized_recording)
 
-        # 3. Transcribe the saved file
+        # Transcribe the saved file
         print("Transcribing audio...")
         transcribed_text = transcribe_audio_sync(RECORDING_PATH)
         print(f"Transcription successful: '{transcribed_text}'")
@@ -136,20 +136,22 @@ def main():
             print("-" * 50)
             continue
 
-        # 5. Profanity filter
+        # Profanity filter
         if not is_safe(text=user_query, client=rag_service.openai_client):
             print("Assistant: Please use appropriate language.")
             continue
 
         print("--- [Processing Request]... ---")
-        bot_response = asyncio.run(rag_service.ask_book_chat(user_query, conversation_history))
+        bot_response_text, image_url = asyncio.run(rag_service.ask_book_chat(user_query, conversation_history))
 
-        print(f"\nAssistant: {bot_response}\n")
+        print(f"\nAssistant: {bot_response_text}\n")
+        if image_url:
+            print(f"Generated image URL: {image_url}\n")
 
-        # 6. Text-to-Speech option
+        # Text-to-Speech option
         listen_choice = input("Would you like to listen to the recommendation? (yes/no): ").lower()
         if listen_choice in ['yes', 'y']:
-            play_audio_response(bot_response)
+            play_audio_response(bot_response_text)
 
         print("-" * 50)
 

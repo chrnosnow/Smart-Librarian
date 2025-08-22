@@ -10,7 +10,8 @@ from smart_librarian.config import (
     CHROMA_DB_PATH,
     COLLECTION_NAME,
     EMBEDDING_MODEL,
-    JSON_PATH
+    JSON_PATH,
+    IMAGE_MODEL
 )
 
 
@@ -60,6 +61,37 @@ class RAGService:
             return summary
         return f"The summary for the book '{title}' was not found."
 
+    def _generate_image_for_book(self, title: str, summary: str) -> str | None:
+        """
+        Generates an image for a book based on its title and summary.
+        :param title: book title
+        :param summary: book summary
+        :return: image URL or None if generation fails
+        """
+        print(f"--- [Image Generation]: Generating image for '{title}' ---")
+        try:
+            # Create a descriptive prompt for the image generation
+            prompt = (
+                f"A symbolic and atmospheric digital painting inspired by the book '{title}'. "
+                f"The artwork should be a visual metaphor for the book's main themes, derived from the summary: '{summary[:500]}'. "
+                f"Focus on mood, imagery, and symbolism to evoke the feeling of the story. "
+            )
+
+            response = self.openai_client.images.generate(
+                model=IMAGE_MODEL,
+                prompt=prompt,
+                n=1,  # Generate one image
+                size="1024x1024",  # Specify the size of the image
+                quality="standard"
+            )
+
+            image_url = response.data[0].url
+            print(f"--- [Image Generation]: Image generated successfully: {image_url} ---")
+            return image_url
+        except Exception as e:
+            print(f"--- [Image Generation Error]: Failed to generate image for '{title}': {e} ---")
+            return None
+
     # --- LRU Cache for Embeddings ---
     # The cache is now an instance method, wrapped with lru_cache.
     # `maxsize=128` means it will store the 128 most recent embeddings.
@@ -74,20 +106,24 @@ class RAGService:
         )
         return response.data[0].embedding
 
-    async def ask_book_chat(self, query: str, messages: list) -> str:
+    async def ask_book_chat(self, query: str, messages: list) -> tuple[str, str | None]:
         """
         Handles a single turn of conversation with the chatbot.
         Implements the RAG pipeline and Function Calling logic.
+        :param query: User's query or interest in books
+        :param messages: Conversation history, starting with system message
+        :return: A tuple containing the response text and an optional image URL
         """
-        # 1. RAG - Retrieval: Find relevant documents in ChromaDB
+
+        # RAG - Retrieval: Find relevant documents in ChromaDB
         query_embedding = self._get_embedding(query)
         results = self.collection.query(query_embeddings=[query_embedding],
                                         n_results=3)  # list with most relevant books
         retrieved_docs = results['documents'][0]
         if not retrieved_docs:
-            return "I'm sorry, I couldn't find any books matching your interest. Could you please rephrase?"
+            return "I'm sorry, I couldn't find any books matching your interest. Could you please rephrase?", None
 
-        # 2. RAG - Augmentation: Construct the context for the prompt
+        # RAG - Augmentation: Construct the context for the prompt
         context = "\n\n---\n\n".join(retrieved_docs)  # concatenate the most relevant books to create the context for AI
         prompt = f"""
 You are a specialized book recommendation assistant. Your task is to follow these rules strictly:
@@ -111,7 +147,7 @@ User's interest: "{query}"
 """
         messages.append({"role": "user", "content": prompt})
 
-        # 3. Generation: Call the LLM with the option to use tools
+        # Generation: Call the LLM with the option to use tools
         # Define the tool for function calling
         # This tool will be used to fetch the detailed summary of the recommended book
         tools = [
@@ -142,14 +178,18 @@ User's interest: "{query}"
         response_message = response.choices[0].message
         messages.append(response_message)  # Add the AI's response to the conversation history
 
-        # 4. Function Calling: Check if the LLM wants to call our function
+        final_text_content = ""
+        recommended_title = ""
+
+        # Function Calling: Check if the LLM wants to call our function
         if response_message.tool_calls:
-            # extract function name and arguments from the tool call
+            # if a book is found, extract function name and arguments from the tool call
             tool_call = response_message.tool_calls[0]
             function_name = tool_call.function.name
             if function_name == "get_summary_by_title":
                 args = json.loads(tool_call.function.arguments)
-                tool_response = self.get_summary_by_title(title=args.get("title"))
+                recommended_title = args.get("title", "")  # Capture the title. Default to empty string if not found
+                tool_response = self.get_summary_by_title(title=recommended_title)
 
                 # Second API call, providing the tool's result back to the LLM
                 messages.append(
@@ -160,13 +200,23 @@ User's interest: "{query}"
                         "content": tool_response,
                     }
                 )
+
                 final_response = self.openai_client.chat.completions.create(
                     model=CHAT_MODEL, messages=messages, max_tokens=250
                 )
-                return final_response.choices[0].message.content
+                final_text_content = final_response.choices[0].message.content
+        else:
+            # Fallback in case no tool call was made
+            final_text_content = response_message.content or "I was unable to generate a response."
 
-        # Fallback in case no tool call was made
-        return response_message.content or "I was unable to generate a response."
+        # Image generation logic
+        image_url = None
+        if recommended_title and final_text_content:
+            book_summary = self.book_summaries_dict.get(recommended_title, "")
+            if book_summary:
+                image_url = self._generate_image_for_book(recommended_title, book_summary)
+
+        return final_text_content, image_url
 
 
 # --- Singleton Instance ---
