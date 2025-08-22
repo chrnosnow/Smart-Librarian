@@ -30,3 +30,6 @@ CHAT_MODEL = "gpt-4.1-mini"
 
 # Text-to-Speech model for audio output
 TTS_MODEL = "tts-1"
+
+# Speech-to-Text model for transcription
+STT_MODEL = "whisper-1"

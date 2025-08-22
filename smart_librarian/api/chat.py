@@ -58,7 +58,7 @@ async def handle_chat_request(request: ChatRequest):
         ]
 
         # Call the RAG service to get the book recommendation
-        response_text = rag_service.ask_book_chat(user_query, conversation_history)
+        response_text = await rag_service.ask_book_chat(user_query, conversation_history)
 
         # 3. Return the structured response
         return ChatResponse(answer=response_text)

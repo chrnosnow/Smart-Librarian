@@ -2,8 +2,11 @@
 
 import os
 import platform
-
+import asyncio
 from dotenv import load_dotenv
+import sounddevice as sd
+from scipy.io.wavfile import write
+import numpy as np
 
 # --- Initial Loading and Client Setup ---
 
@@ -17,6 +20,12 @@ from smart_librarian.config import SPEECH_OUTPUT_PATH
 from smart_librarian.core.rag_service import rag_service
 from smart_librarian.core.audio_service import generate_speech_stream
 from smart_librarian.core.helpers import is_safe
+from smart_librarian.core.speech_service import transcribe_audio_sync
+from smart_librarian.config import DATA_DIR
+
+# --- Constants for Audio Recording ---
+SAMPLE_RATE = 44100  # Hertz
+RECORDING_PATH = DATA_DIR / "recording.wav"
 
 
 # --- Audio Features ---
@@ -45,6 +54,54 @@ def play_audio_response(text: str):
         print(f"An error occurred while generating or playing the audio: {e}")
 
 
+def record_and_transcribe_audio() -> str:
+    """Records audio from the microphone, saves it, and transcribes it."""
+    try:
+        # 1. Record Audio
+        duration_str = input("Enter recording duration in seconds (e.g., 5): ")
+        duration = int(duration_str)
+        print("\nRecording...")
+        recording = sd.rec(int(duration * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=1, dtype=np.int16)
+        sd.wait()  # Wait until recording is finished
+        print("Recording finished.")
+
+        # 2. Normalize audio ---
+        # Convert to floating point numbers for calculations
+        recording_float = recording.astype(np.float32)
+
+        # Find the maximum absolute value in the recording
+        max_amplitude = np.max(np.abs(recording_float))
+
+        # If there's some sound (not total silence)
+        if max_amplitude > 0:
+            # Calculate the scaling factor to boost volume to 98% of max
+            scaling_factor = 0.98 / max_amplitude
+            # Apply the scaling factor
+            normalized_recording_float = recording_float * scaling_factor
+            # Convert back to int16 for saving as a WAV file
+            normalized_recording = (normalized_recording_float * np.iinfo(np.int16).max).astype(np.int16)
+        else:
+            # If it's pure silence, do nothing
+            normalized_recording = recording
+
+        # 3. Save the normalized recording to a WAV file
+        print(f"Saving recording to {RECORDING_PATH}...")
+        write(RECORDING_PATH, SAMPLE_RATE, normalized_recording)
+
+        # 3. Transcribe the saved file
+        print("Transcribing audio...")
+        transcribed_text = transcribe_audio_sync(RECORDING_PATH)
+        print(f"Transcription successful: '{transcribed_text}'")
+        return transcribed_text
+
+    except ValueError:
+        print("Invalid duration. Please enter a number.")
+        return ""
+    except Exception as e:
+        print(f"An error occurred during voice input: {e}")
+        return ""
+
+
 # --- Main Application Loop (CLI) ---
 
 def main():
@@ -59,10 +116,25 @@ def main():
     ]
 
     while True:
-        user_query = input("You: ")
-        if user_query.lower() in ["quit", "exit"]:
+        input_mode = input("Choose input mode: (1) Text or (2) Voice [type 'exit', 'quit' or 'q' to quit]: ").lower()
+
+        if input_mode in ['exit', 'quit', 'q']:
             print("Goodbye!")
             break
+
+        user_query = ""
+        if input_mode in ['1', 'text']:
+            user_query = input("You: ")
+        elif input_mode in ['2', 'voice']:
+            user_query = record_and_transcribe_audio()
+        else:
+            print("Invalid input mode. Please choose '1' for text or '2' for voice.")
+            continue
+
+        # If transcription failed or user entered nothing, restart loop
+        if not user_query:
+            print("-" * 50)
+            continue
 
         # 5. Profanity filter
         if not is_safe(text=user_query, client=rag_service.openai_client):
@@ -70,7 +142,7 @@ def main():
             continue
 
         print("--- [Processing Request]... ---")
-        bot_response = rag_service.ask_book_chat(user_query, conversation_history)
+        bot_response = asyncio.run(rag_service.ask_book_chat(user_query, conversation_history))
 
         print(f"\nAssistant: {bot_response}\n")
 

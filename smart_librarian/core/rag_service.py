@@ -74,7 +74,7 @@ class RAGService:
         )
         return response.data[0].embedding
 
-    def ask_book_chat(self, query: str, messages: list) -> str:
+    async def ask_book_chat(self, query: str, messages: list) -> str:
         """
         Handles a single turn of conversation with the chatbot.
         Implements the RAG pipeline and Function Calling logic.

@@ -20,5 +20,6 @@ venv/
 
 # Ignore generated audio files from the TTS service
 /data/speech.mp3
+/data/recording.mp3
 
 prompt_examples/
