@@ -1,0 +1,23 @@
+services:
+  # The Backend API service
+  api:
+    build: . # Look for the Dockerfile in the current directory
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app # Mount the entire project directory into /app in the container
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    env_file:
+      - .env # Pass the .env file to the container for the API key
+
+  # The Frontend React service
+  frontend:
+    build:
+      context: ./frontend # Look for the Dockerfile in the ./frontend directory
+    volumes:
+      - ./frontend:/app # Mount the local frontend directory into the container
+      - /app/node_modules # A special anonymous volume to prevent local node_modules from overwriting the container's
+    ports:
+      - "3000:5173" # Map host port 3000 to container port 5173
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Helps with live reloading on some systems

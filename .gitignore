@@ -23,3 +23,5 @@ venv/
 /data/recording.mp3
 
 prompt_examples/
+
+docker-compose.setup.yml
