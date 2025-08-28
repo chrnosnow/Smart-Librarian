@@ -10,13 +10,12 @@ WORKDIR /app
 # This is done separately to leverage Docker layer caching
 COPY package*.json ./
 
-# Install build tools AND the compatibility library needed for many native Node modules,
+# Install build tools and the compatibility library needed for many native Node modules,
 # install all npm dependencies, and then remove the build tools.
-# We keep libc6-compat as it might be needed at runtime.
-# RUN apk add --no-cache libc6-compat \
-#     && apk add --no-cache --virtual .build-deps python3 make g++ \
-#     && npm install \
-#     && apk del .build-deps
+RUN apk add --no-cache libc6-compat \
+    && apk add --no-cache --virtual .build-deps python3 make g++ \
+    && npm install \
+    && apk del .build-deps
 
 # Copy the rest of the frontend app's source code
 COPY . .
@@ -27,4 +26,3 @@ EXPOSE 5173
 # The command to run the Vite dev server
 # We add "-- --host" to make it accessible outside the container.
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
-# CMD npm run dev -- --host 0.0.0.0
