@@ -8,13 +8,16 @@
   --font-body: 'Lora', serif;
   --font-ui: 'Roboto', sans-serif;
   --color-background: #fdfaf5;
+  --color-header-bg: #a5a9cd;
   --color-text: #2c2a2a;
   --color-primary: #0056b3;
   --color-primary-dark: #003d82;
-  --color-secondary-bg: #e9eef2;
-  --color-accent-bg: #d4e4f7;
+  --color-secondary-bg: #ebecfc; /* Bot message */
+  --color-accent-bg: #ffe4e5;   /* User message */
   --color-border: #ccc;
   --color-danger: #d9534f;
+  --color-button: #d19fa0;
+  --color-button-dark: #b37475;
 }
 
 .accessibility-theme {
@@ -22,11 +25,12 @@
   --font-body: 'OpenDyslexic', sans-serif;
   --font-ui: 'OpenDyslexic', sans-serif;
   --color-background: #000000;
+  --color-header-bg: #001a33;
   --color-text: #FFFF00;
   --color-primary: #3399FF;
   --color-primary-dark: #66B2FF;
-  --color-secondary-bg: #222222;
-  --color-accent-bg: #333333;
+  --color-secondary-bg: #222222; /* Bot message (dark grey) */
+  --color-accent-bg: #333333;   /* User message (lighter grey) */
   --color-border: #FFFFFF;
   --color-danger: #FF6666;
 }
@@ -63,11 +67,12 @@ body {
 .header {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background);
+  background-color: var(--color-header-bg);
   text-align: center;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background-color 0.3s ease;
 }
 
 .header h1 {
@@ -121,9 +126,9 @@ body {
 .tts-button {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--color-primary);
-  background-color: var(--color-primary);
-  color: #fff; /* White text is usually safe on colored buttons */
+  border: 1px solid var(--color-button);
+  background-color: var(--color-button);
+  color: #000;
   border-radius: 5px;
   cursor: pointer;
   font-family: var(--font-ui);
@@ -131,6 +136,8 @@ body {
 }
 .accessibility-theme .tts-button {
     color: var(--color-background); /* Black text on bright button */
+    background-color: var(--color-primary);
+    border: var(--color-primary);
 }
 
 .tts-button:hover {
@@ -142,7 +149,7 @@ body {
   padding: 1rem;
   border-top: 1px solid var(--color-border);
   gap: 0.75rem;
-  background-color: var(--color-background);
+  background-color: var(--color-header-bg);
 }
 
 .text-input {
@@ -160,8 +167,8 @@ body {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 20px;
-  background-color: var(--color-primary);
-  color: #fff; /* White text on buttons */
+  background-color: var(--color-button);
+  color: #000;
   font-family: var(--font-ui);
   font-weight: 500;
   cursor: pointer;
@@ -169,6 +176,8 @@ body {
 }
 .accessibility-theme .action-button {
     color: var(--color-background); /* Black text on bright buttons */
+    background-color: var(--color-primary);
+    border: var(--color-primary);
 }
 
 
@@ -263,4 +272,47 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+/* === STYLES for ThinkingBubble === */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px; /* Give it some space */
+}
+
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  background-color: var(--color-text);
+  opacity: 0.7;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 4px;
+
+  /* Apply the animation */
+  animation-name: bounce;
+  animation-duration: 1.4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+/* Add delays to create a wave effect */
+.typing-indicator span:nth-of-type(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-of-type(3) {
+  animation-delay: 0.4s;
+}
+
+/* Define the bouncing animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
