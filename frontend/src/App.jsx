@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import './App.css';
 import { postChatMessage, postAudioForTranscription, fetchTextToSpeech } from './apiService';
+import AccessibilityToggle from './AccessibilityToggle';
 
 function App() {
   const [messages, setMessages] = useState([
@@ -17,12 +17,36 @@ function App() {
   const audioChunks = useRef([]);
   const chatWindowRef = useRef(null);
 
-  // Automatically scroll down when new messages are added
+  const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
+
+// Automatically scroll down when new messages are added
   useEffect(() => {
-    if (chatWindowRef.current) {
-      chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
-    }
+      if (chatWindowRef.current) {
+          chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+      }
   }, [messages]);
+
+  useEffect(() => {
+    if (isAccessibilityMode) {
+      document.body.classList.add('accessibility-theme');
+    } else {
+      document.body.classList.remove('accessibility-theme');
+    }
+    // Optional: Save preference to localStorage
+    localStorage.setItem('accessibilityMode', isAccessibilityMode);
+  }, [isAccessibilityMode]);
+
+  // Optional: Load preference on initial render
+  useEffect(() => {
+    const savedMode = localStorage.getItem('accessibilityMode') === 'true';
+    setIsAccessibilityMode(savedMode);
+  }, []);
+
+  const handleToggleAccessibility = () => {
+    setIsAccessibilityMode(prevMode => !prevMode);
+  };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,6 +125,10 @@ function App() {
     <div className="app-container">
       <header className="header">
         <h1>Smart Librarian</h1>
+        <AccessibilityToggle
+          isEnabled={isAccessibilityMode}
+          onToggle={handleToggleAccessibility}
+        />
       </header>
       <div className="chat-window" ref={chatWindowRef}>
         {messages.map((msg, index) => (

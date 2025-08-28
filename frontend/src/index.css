@@ -1,29 +1,266 @@
-/* Import a classic, readable serif font from Google Fonts */
+/* === FONT IMPORTS === */
+@import url('https://fonts.googleapis.com/css2?family=Open+Dyslexic:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Roboto:wght@400;500&display=swap');
 
+/* === THEME DEFINITIONS === */
 :root {
-    --font-body: 'Lora', serif;
-    --font-ui: 'Roboto', sans-serif;
-
-    --color-background: #fdfaf5; /* A warm, paper-like off-white */
-    --color-text: #2c2a2a; /* A very dark grey, softer than pure black */
-    --color-primary: #0056b3; /* A professional, deep blue for interaction */
-    --color-primary-dark: #003d82;
-    --color-secondary-bg: #e9eef2; /* Light blue-grey for bot messages */
-    --color-accent-bg: #d4e4f7; /* Lighter blue for user messages */
-    --color-border: #ccc;
-    --color-danger: #d9534f;
+  /* Default Theme */
+  --font-body: 'Lora', serif;
+  --font-ui: 'Roboto', sans-serif;
+  --color-background: #fdfaf5;
+  --color-text: #2c2a2a;
+  --color-primary: #0056b3;
+  --color-primary-dark: #003d82;
+  --color-secondary-bg: #e9eef2;
+  --color-accent-bg: #d4e4f7;
+  --color-border: #ccc;
+  --color-danger: #d9534f;
 }
 
+.accessibility-theme {
+  /* Accessibility Theme */
+  --font-body: 'OpenDyslexic', sans-serif;
+  --font-ui: 'OpenDyslexic', sans-serif;
+  --color-background: #000000;
+  --color-text: #FFFF00;
+  --color-primary: #3399FF;
+  --color-primary-dark: #66B2FF;
+  --color-secondary-bg: #222222;
+  --color-accent-bg: #333333;
+  --color-border: #FFFFFF;
+  --color-danger: #FF6666;
+}
+
+/* === GLOBAL & RESET STYLES === */
 body {
-    margin: 0;
-    font-family: var(--font-body);
-    background-color: var(--color-background);
-    color: var(--color-text);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/* === COMPONENT STYLES === */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  background-color: #fff;
+  /* Make the container's background also use the theme color */
+  background-color: var(--color-background);
+}
+
+.header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
+
+.chat-window {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  padding: 0.75rem 1.25rem;
+  border-radius: 18px;
+  line-height: 1.6;
+  border: 1px solid var(--color-border);
+  color: var(--color-text); /* Ensure messages use the theme text color */
+}
+
+.message.user {
+  background-color: var(--color-accent-bg);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.message.bot {
+  background-color: var(--color-secondary-bg);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.bot-image {
+  max-width: 256px;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.tts-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-primary);
+  color: #fff; /* White text is usually safe on colored buttons */
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: background-color 0.2s;
+}
+.accessibility-theme .tts-button {
+    color: var(--color-background); /* Black text on bright button */
+}
+
+.tts-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.input-area {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid var(--color-border);
+  gap: 0.75rem;
+  background-color: var(--color-background);
+}
+
+.text-input {
+  flex-grow: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.action-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--color-primary);
+  color: #fff; /* White text on buttons */
+  font-family: var(--font-ui);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.accessibility-theme .action-button {
+    color: var(--color-background); /* Black text on bright buttons */
+}
+
+
+.action-button:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+}
+
+.action-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.mic-button.recording {
+  background-color: var(--color-danger);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(217, 83, 79, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
+}
+
+/* === STYLES for AccessibilityToggle === */
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-ui);
+  color: var(--color-text);
+}
+
+.toggle-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--color-primary);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--color-primary);
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(22px);
+  -ms-transform: translateX(22px);
+  transform: translateX(22px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
