@@ -12,8 +12,8 @@
   --color-text: #1a1818;
   --color-primary: #0056b3;
   --color-primary-dark: #003d82;
-  --color-secondary-bg: #e9eef2; /* Bot message */
-  --color-accent-bg: #d4e4f7;   /* User message */
+  --color-secondary-bg: #e9eef2; /*Bot message*/
+  --color-accent-bg: #d4e4f7;   /*User message*/
   --color-border: #b0b0b0;
   --color-danger: #d9534f;
 }
