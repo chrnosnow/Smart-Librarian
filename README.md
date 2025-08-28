@@ -33,7 +33,7 @@ This application fulfills a comprehensive set of requirements, showcasing modern
 - **Interactive CLI Client**: A fully-featured command-line interface (`rag_chat_cli.py`) is available for testing and
   demonstrating all backend features, including voice input/output.
 
-- **Modern Frontend (In Progress)**: The architecture is designed to support a decoupled frontend. All backend
+- **Modern Frontend**: The architecture is designed to support a decoupled frontend. All backend
   functionalities are exposed via API, ready to be consumed by a web interface.
 
 ## Tech Stack
@@ -44,7 +44,7 @@ This application fulfills a comprehensive set of requirements, showcasing modern
     - Retrieval-Augmented Generation (RAG)
 - **Database**: ChromaDB (Persistent Vector Store)
 - **CLI Tools**: `sounddevice`, `scipy` for audio recording
-- **Frontend (Planned)**: React + Vite, JavaScript
+- **Frontend**: React + Vite, JavaScript
 - **Containerization**: Docker, Docker Compose
 
 ## Project Structure
@@ -69,7 +69,7 @@ The project follows a clean, scalable structure:
 
 - Docker and Docker Compose (or a compatible tool like Rancher Desktop). This is the recommended way to run the project.
 - Python 3.9+
-- Node.js and npm (for the upcoming frontend)
+- Node.js and npm
 - An OpenAI API key
 
 ### Installation & Setup
@@ -154,8 +154,6 @@ The backend exposes the following main endpoints:
 
 ## To-Do & Future Work
 
--   [ ] **Implement the React Frontend**: Build a full-featured, responsive user interface that consumes the backend
-    API.
 -   [ ] **Stream TTS to Browser**: Implement direct audio streaming to the browser instead of just providing a link.
 -   [ ] **Real-time Microphone Streaming**: Enhance the STT feature on the frontend to use the browser's microphone in
     real-time.
