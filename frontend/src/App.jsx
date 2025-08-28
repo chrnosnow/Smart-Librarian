@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { postChatMessage, postAudioForTranscription, fetchTextToSpeech } from './apiService';
 import AccessibilityToggle from './AccessibilityToggle';
+import ThinkingBubble from './ThinkingBubble';
 
 function App() {
   const [messages, setMessages] = useState([
@@ -45,8 +46,6 @@ function App() {
   const handleToggleAccessibility = () => {
     setIsAccessibilityMode(prevMode => !prevMode);
   };
-
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -144,7 +143,7 @@ function App() {
             )}
           </div>
         ))}
-        {isLoading && <div className="message bot">Thinking...</div>}
+        {isLoading && <ThinkingBubble />}
       </div>
       <form className="input-area" onSubmit={handleSubmit}>
         <input
