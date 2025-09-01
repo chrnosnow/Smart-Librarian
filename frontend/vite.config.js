@@ -8,7 +8,8 @@ export default defineConfig({
       proxy:{
           // requests to any path starting with /api will be forwarded to the FastAPI server
           '/api':{
-            target: 'http://localhost:8000',    // the address of the FastAPI server
+//            target: 'http://localhost:8000',    // the address of the FastAPI server
+            target: 'http://api:8000',
             changeOrigin: true,  // recommended for virtual hosted sites
           },
       },

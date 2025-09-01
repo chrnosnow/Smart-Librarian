@@ -126,24 +126,18 @@ class RAGService:
         # RAG - Augmentation: Construct the context for the prompt
         context = "\n\n---\n\n".join(retrieved_docs)  # concatenate the most relevant books to create the context for AI
         prompt = f"""
-You are a specialized book recommendation assistant. Your task is to follow these rules strictly:
+You are a book recommendation assistant. Your ONLY source of information is the "Available Summaries" provided below.
 
-1.  Your ONLY source of information is the "Available Summaries" provided below. Do NOT use any of your own knowledge about books.
-2.  You must analyze the user's interest and compare it against the provided summaries.
-3.  **Decision Rule:**
-    - **IF** you find a book summary that is a strong, direct match for the user's interest, you will recommend that ONE book.
-    - **ELSE** (if there are no strong matches or the summaries are irrelevant to the user's interest), you MUST respond with: "I couldn't find a suitable book in my database for that specific interest. Could I help you with a different theme?" Do not try to recommend the 'closest' or 'most similar' book if it is not a good fit.
-
-4.  **Format for a Successful Recommendation:**
-    - First, provide a brief, 1-2 sentence explanation for why the book is a good match.
-    - After your explanation, you MUST call the `get_summary_by_title` tool. Do not write the summary yourself.
+1.  **Analyze the user's interest:** "{query}"
+2.  **Compare it to the summaries.**
+3.  **Decision:**
+    - If you find a strong, relevant match, you MUST call the `get_summary_by_title` function with the exact title of that book.
+    - If you do NOT find a strong match, your ONLY response must be: "I couldn't find a suitable book in my database for that specific interest. Could I help you with a different theme?"
 
 ---
 Available summaries (context):
 {context}
 ---
-
-User's interest: "{query}"
 """
         messages.append({"role": "user", "content": prompt})
 
@@ -173,7 +167,8 @@ User's interest: "{query}"
 
         # First API call
         response = self.openai_client.chat.completions.create(
-            model=CHAT_MODEL, messages=messages, tools=tools, tool_choice="auto"
+            model=CHAT_MODEL, messages=messages, tools=tools,
+            tool_choice={"type": "function", "function": {"name": "get_summary_by_title"}},
         )
         response_message = response.choices[0].message
         messages.append(response_message)  # Add the AI's response to the conversation history
@@ -201,13 +196,27 @@ User's interest: "{query}"
                     }
                 )
 
+                # Build the SECOND prompt, which includes the summary.
+                # This is where we ask the model to be conversational.
+                second_prompt_messages = [
+                    {"role": "system", "content": "You are a friendly and helpful book recommendation assistant."},
+                    {"role": "user", "content": f"Please recommend a book for my interest in '{query}'."},
+                    {
+                        "role": "assistant",
+                        "content": f"I have found a book for you. Here is the summary for '{recommended_title}':\n\n{tool_response}"
+                    },
+                    {"role": "user",
+                     "content": "Excellent, please present this to me. Start with a brief, 1-2 sentence explanation of why this book matches my interest, and then provide the full summary you were given."}
+                ]
+
                 final_response = self.openai_client.chat.completions.create(
-                    model=CHAT_MODEL, messages=messages, max_tokens=250
+                    model=CHAT_MODEL, messages=second_prompt_messages, max_tokens=400
                 )
                 final_text_content = final_response.choices[0].message.content
         else:
-            # Fallback in case no tool call was made
-            final_text_content = response_message.content or "I was unable to generate a response."
+            # This 'else' block  handles the case where the model couldn't find a match
+            # and decided not to call the function, as per our instructions.
+            final_text_content = response_message.content or "I couldn't find a suitable book for that interest."
 
         # Image generation logic
         image_url = None
