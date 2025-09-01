@@ -152,6 +152,26 @@ The backend exposes the following main endpoints:
 | `POST` | `/api/tts`  | Converts text to streaming audio.                    |
 | `POST` | `/api/stt`  | Transcribes an uploaded audio file to text.          |
 
+## Example Usage
+
+# Successful chat response:
+
+When a user's query matches a book in the database, the chatbot provides a concise recommendation, a full summary, and a
+generated cover image.
+
+**Normal chat**
+![alt text="A screenshot of the Smart Librarian chat interface. The chat shows a user query and a successful book recommendation from the bot, including a summary and a generated image."](prompt_examples/successful_result_ui.png)
+
+**Accessibility mode chat**
+![alt text="A screenshot of the Smart Librarian chat interface in high-contrast accessibility mode. The chat shows a user query and a successful book recommendation from the bot, including a summary and a generated image."](prompt_examples/successful_result_accessibility_mode_ui.png)
+
+# Book not found:
+
+When a user's query does not match any book in the database, the chatbot responds appropriately, indicating that no
+recommendation can be made.
+
+![alt text="Screenshot of the Smart Librarian chat, showing the bot's response when no suitable book is found in the database."](prompt_examples/book_not_found_ui.png)
+
 ## To-Do & Future Work
 
 -   [ ] **Stream TTS to Browser**: Implement direct audio streaming to the browser instead of just providing a link.

@@ -136,7 +136,7 @@ function App() {
             {msg.imageUrl && (
               <img src={msg.imageUrl} alt="Book cover" className="bot-image" />
             )}
-            {msg.sender === 'bot' && !msg.imageUrl && index > 0 && (
+            {msg.sender === 'bot' && msg.text && index > 0 && (
               <button onClick={() => handleListen(msg.text)} className="tts-button">
                 Listen
               </button>
